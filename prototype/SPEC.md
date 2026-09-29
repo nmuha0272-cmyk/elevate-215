@@ -30,15 +30,19 @@ The filter reads as a sentence: "Show notes from [school] about [metric] that ar
 - Load sample notes for demos. Each one is marked `[Sample]`.
 - Delete one note or all notes.
 
+## Two versions
+- **Shared (`shared.html`), the one to use:** published as a private claude.ai page. Notes are saved online with the page, so Renée adds them and Stacy looks them up from her own computer with the same link.
+- **Offline (`index.html`):** open the file in any browser. Notes are saved in that browser only.
+
 ## Scope
 - This is a throwaway prototype for testing the workflow.
-- No login.
-- No real database. Notes are saved in the browser's local storage.
+- No login beyond claude.ai's own sharing.
+- No real database. The shared version uses the claude.ai page's built-in storage; the offline version uses the browser's local storage.
 - The goal is to find out whether the workflow is useful before investing in a production version.
 
 ## Known limits
-- **Notes stay in one browser.** Stacy can see Renée's notes only on the same computer and browser. Otherwise, Renée has to download the CSV and send it to her.
-- Clearing browser data deletes the notes.
+- **Sharing:** the shared page is private until its owner shares it from the page's Share menu. Renée needs **Contributor** access (or higher) to add notes. Stacy can look them up with **Viewer** access.
+- **Offline version:** notes stay in one browser, and clearing browser data deletes them.
 - There's no editing. To fix a note, delete it and add it again.
 
 ## Open questions (from the proposal)
