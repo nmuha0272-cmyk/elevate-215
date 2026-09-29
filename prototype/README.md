@@ -2,6 +2,8 @@
 
 A throwaway prototype to test one workflow change from the funder-reporting proposal: Renée adds a metric and an on/off-track status next to each visit note, so Stacy can pull up what she needs without reading every note.
 
+**Running the trial:** see [`TRIAL.md`](TRIAL.md) for the step-by-step runbook, including the before-they-start baseline question and what to record.
+
 **Shared version (use this one):** `shared.html` is published as a private claude.ai page, so notes are saved online and Stacy can see Renée's notes from her own computer. Share it from the page's Share menu: give Renée Contributor access so she can add notes. Stacy only needs Viewer access to look them up.
 
 **Offline version:** open `index.html` in a browser. No install, no login, no server, but notes stay in that one browser.
