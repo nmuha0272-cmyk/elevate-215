@@ -27,8 +27,8 @@ The filter reads as a sentence: "Show notes from [school] about [metric] that ar
 
 **Extras:**
 - Download the entries currently showing as a CSV file (opens in Excel or Google Sheets).
-- Load sample notes for demos. Each one is marked `[Sample]`.
-- Delete one note or all notes.
+- Load sample notes for demos, marked `[Sample]` (offline version only).
+- Delete a note. The offline version can also delete all notes at once.
 
 ## Two versions
 - **Shared (`shared.html`), the one to use:** published as a private claude.ai page. Notes are saved online with the page, so Renée adds them and Stacy looks them up from her own computer with the same link.
