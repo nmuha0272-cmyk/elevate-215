@@ -262,7 +262,7 @@
         <td class="notes">${esc(e.notes)}</td>
         <td><button type="button" class="link" data-del="${e.id}" aria-label="Delete note">Delete</button></td>
       </tr>`).join('')
-      : `<tr><td colspan="6" class="empty">${entries.length ? 'No notes match. Try "Show everything".' : 'No notes yet. Add one above.'}</td></tr>`;
+      : `<tr><td colspan="6" class="empty">${entries.length ? 'No notes match. Try "Show everything".' : 'No notes yet. Add one below, or load sample notes to try it out.'}</td></tr>`;
   }
 
   function update() { refreshOptions(); render(); }

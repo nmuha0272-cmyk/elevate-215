@@ -31,7 +31,7 @@ The filter sits at the top of the page. One-click quick picks ("All notes", "Off
 
 **Extras:**
 - Download the entries currently showing as a CSV file (opens in Excel or Google Sheets).
-- Load sample notes for demos, marked `[Sample]` (offline version only).
+- Load sample notes for demos, marked `[Sample]`. On the shared page, "Remove sample notes" deletes only the samples and leaves real notes alone.
 - Delete a note. The offline version can also delete all notes at once.
 
 ## Two versions
