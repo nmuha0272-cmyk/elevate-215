@@ -23,7 +23,7 @@ Let Renée quickly log school-visit notes with structured metrics and an on/off-
 - Status
 - A word in the notes (optional)
 
-The filter reads as a sentence: "Show notes from [school] about [metric] that are [on/off track]." Stacy has said she doesn't know how to filter in most systems, so the prototype avoids spreadsheet-style filter controls.
+The filter sits at the top of the page. One-click quick picks ("All notes", "Off track only", "On track only", and one button per school) cover the common lookups. The full filter reads as a sentence: "Show notes from [school] about [metric] that are [on/off track]." Stacy has said she doesn't know how to filter in most systems, so the prototype avoids spreadsheet-style filter controls.
 
 **Extras:**
 - Download the entries currently showing as a CSV file (opens in Excel or Google Sheets).
