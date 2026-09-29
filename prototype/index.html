@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>School Visit Notes</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #1d2330; --muted: #5f6878; --border: #d9dde4;
+    --accent: #1f5fbf; --on: #1e7a46; --on-bg: #e3f4ea; --off: #b3261e; --off-bg: #fbe6e4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  main { max-width: 1000px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: inherit; }
+  textarea { min-height: 90px; resize: vertical; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .status-pick { display: flex; gap: 8px; }
+  .status-pick label { flex: 1; font-weight: 500; border: 1px solid var(--border); border-radius: 6px; padding: 8px; text-align: center; cursor: pointer; margin: 0; }
+  .status-pick input { position: absolute; opacity: 0; width: 1px; }
+  .status-pick input:checked + span.on { color: var(--on); }
+  .status-pick input:checked + span.off { color: var(--off); }
+  .status-pick label:has(input:checked) { border-width: 2px; }
+  .status-pick label:has(input[value="On track"]:checked) { background: var(--on-bg); border-color: var(--on); }
+  .status-pick label:has(input[value="Off track"]:checked) { background: var(--off-bg); border-color: var(--off); }
+  .status-pick label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; padding: 9px 16px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--accent); }
+  button.link { border: none; background: none; color: var(--muted); padding: 2px 6px; text-decoration: underline; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.05rem; margin-bottom: 12px; }
+  .sentence select { width: auto; min-width: 150px; }
+  .summary { color: var(--muted); margin: 8px 0 14px; }
+  .summary strong { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: .85rem; color: var(--muted); font-weight: 600; }
+  td.notes { white-space: pre-wrap; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; white-space: nowrap; }
+  .pill.on { background: var(--on-bg); color: var(--on); }
+  .pill.off { background: var(--off-bg); color: var(--off); }
+  .empty { color: var(--muted); text-align: center; padding: 28px 0; }
+  .msg { color: var(--on); font-weight: 600; }
+  @media (max-width: 700px) {
+    thead { display: none; }
+    tr { display: block; border-bottom: 1px solid var(--border); padding: 8px 0; }
+    td { display: block; border: none; padding: 2px 0; }
+    td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-size: .85rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>School Visit Notes</h1>
+  <p class="sub">Prototype. Notes are saved only in this browser. Nothing is sent anywhere.</p>
+
+  <section class="card" aria-labelledby="add-h">
+    <h2 id="add-h">Add a visit note</h2>
+    <form id="entry-form">
+      <div class="grid">
+        <div>
+          <label for="f-school">School</label>
+          <input id="f-school" list="school-list" required autocomplete="off" placeholder="e.g. Lincoln Elementary">
+          <datalist id="school-list"></datalist>
+        </div>
+        <div>
+          <label for="f-date">Visit date</label>
+          <input id="f-date" type="date" required>
+        </div>
+        <div>
+          <label for="f-metric">Metric</label>
+          <input id="f-metric" list="metric-list" required autocomplete="off" placeholder="e.g. Attendance">
+          <datalist id="metric-list"></datalist>
+        </div>
+        <div>
+          <label id="status-l">Status</label>
+          <div class="status-pick" role="radiogroup" aria-labelledby="status-l">
+            <label><input type="radio" name="status" value="On track" required><span class="on">On track</span></label>
+            <label><input type="radio" name="status" value="Off track"><span class="off">Off track</span></label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" placeholder="What you saw on the visit"></textarea>
+      </div>
+      <div class="row">
+        <button type="submit">Save note</button>
+        <span id="saved-msg" class="msg" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="find-h">
+    <h2 id="find-h">Find notes</h2>
+    <div class="sentence">
+      <span>Show notes from</span>
+      <select id="q-school" aria-label="School"></select>
+      <span>about</span>
+      <select id="q-metric" aria-label="Metric"></select>
+      <span>that are</span>
+      <select id="q-status" aria-label="Status"></select>
+    </div>
+    <div class="row">
+      <input id="q-text" type="search" placeholder="Search words in notes (optional)" style="max-width:340px">
+      <button type="button" class="secondary" id="q-reset">Show everything</button>
+      <button type="button" class="secondary" id="export">Download as spreadsheet (CSV)</button>
+    </div>
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <table>
+      <thead><tr><th>Date</th><th>School</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="row" style="margin-top:16px">
+      <button type="button" class="link" id="sample">Load sample notes (for trying it out)</button>
+      <button type="button" class="link" id="clear-all">Delete all notes</button>
+    </p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const KEY = 'elevate215.visitNotes.v1';
+  const DEFAULT_METRICS = ['Attendance', 'Chronic absenteeism', 'Reading proficiency', 'Math proficiency', 'Enrollment', 'Teacher retention'];
+  const ANY = '';
+  const $ = id => document.getElementById(id);
+
+  let entries = load();
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(entries)); }
+    catch { alert('Could not save. Your browser may be blocking storage for this page.'); }
+  }
+  const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const norm = s => s.trim().replace(/\s+/g, ' ');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtDate = d => d ? new Date(d + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+  // Reuse existing spelling/casing so "lincoln elem" and "Lincoln Elem" don't split into two schools.
+  function canonical(value, existing) {
+    const v = norm(value);
+    return existing.find(e => e.toLowerCase() === v.toLowerCase()) || v;
+  }
+
+  function fillSelect(sel, options, anyLabel) {
+    const prev = sel.value;
+    sel.innerHTML = `<option value="${ANY}">${anyLabel}</option>` + options.map(o => `<option>${esc(o)}</option>`).join('');
+    sel.value = options.includes(prev) ? prev : ANY;
+  }
+
+  function refreshOptions() {
+    const schools = uniq(entries.map(e => e.school));
+    const metrics = uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)]);
+    $('school-list').innerHTML = schools.map(s => `<option value="${esc(s)}">`).join('');
+    $('metric-list').innerHTML = metrics.map(m => `<option value="${esc(m)}">`).join('');
+    fillSelect($('q-school'), schools, 'all schools');
+    fillSelect($('q-metric'), uniq(entries.map(e => e.metric)), 'any metric');
+    fillSelect($('q-status'), ['On track', 'Off track'], 'on or off track');
+  }
+
+  function filtered() {
+    const s = $('q-school').value, m = $('q-metric').value, st = $('q-status').value;
+    const text = $('q-text').value.trim().toLowerCase();
+    return entries
+      .filter(e => (!s || e.school === s) && (!m || e.metric === m) && (!st || e.status === st))
+      .filter(e => !text || [e.school, e.metric, e.notes].join(' ').toLowerCase().includes(text))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.created - a.created);
+  }
+
+  function render() {
+    const list = filtered();
+    const off = list.filter(e => e.status === 'Off track').length;
+    const schools = new Set(list.map(e => e.school)).size;
+    $('summary').innerHTML = entries.length
+      ? `Showing <strong>${list.length}</strong> of ${entries.length} notes across ${schools} school${schools === 1 ? '' : 's'} · <strong>${off}</strong> off track`
+      : '';
+    $('rows').innerHTML = list.length ? list.map(e => `
+      <tr>
+        <td data-label="Date">${esc(fmtDate(e.date))}</td>
+        <td data-label="School">${esc(e.school)}</td>
+        <td data-label="Metric">${esc(e.metric)}</td>
+        <td><span class="pill ${e.status === 'On track' ? 'on' : 'off'}">${esc(e.status)}</span></td>
+        <td class="notes">${esc(e.notes)}</td>
+        <td><button type="button" class="link" data-del="${e.id}" aria-label="Delete note">Delete</button></td>
+      </tr>`).join('')
+      : `<tr><td colspan="6" class="empty">${entries.length ? 'No notes match. Try "Show everything".' : 'No notes yet. Add one above.'}</td></tr>`;
+  }
+
+  function update() { refreshOptions(); render(); }
+
+  $('entry-form').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const f = ev.target;
+    entries.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+      created: Date.now(),
+      school: canonical($('f-school').value, uniq(entries.map(e => e.school))),
+      date: $('f-date').value,
+      metric: canonical($('f-metric').value, uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)])),
+      status: f.status.value,
+      notes: $('f-notes').value.trim(),
+    });
+    save();
+    // Keep school + date filled: Renée often logs several metrics from the same visit.
+    $('f-metric').value = ''; $('f-notes').value = '';
+    f.querySelectorAll('input[name=status]').forEach(r => r.checked = false);
+    $('f-metric').focus();
+    $('saved-msg').textContent = 'Saved.';
+    setTimeout(() => $('saved-msg').textContent = '', 2000);
+    update();
+  });
+
+  ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).addEventListener('change', render));
+  $('q-text').addEventListener('input', render);
+  $('q-reset').addEventListener('click', () => {
+    ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).value = ANY);
+    $('q-text').value = '';
+    render();
+  });
+
+  $('rows').addEventListener('click', ev => {
+    const id = ev.target.dataset.del;
+    if (!id || !confirm('Delete this note?')) return;
+    entries = entries.filter(e => e.id !== id);
+    save(); update();
+  });
+
+  $('export').addEventListener('click', () => {
+    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [['Date', 'School', 'Metric', 'Status', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.notes])]
+      .map(r => r.map(cell).join(',')).join('\r\n');
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
+      download: `visit-notes-${new Date().toISOString().slice(0, 10)}.csv`,
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  $('sample').addEventListener('click', () => {
+    const schools = ['Lincoln Elementary', 'Harmony Charter', 'St. Malachy School', 'Kensington Prep'];
+    const notes = {
+      'On track': ['Principal shared updated numbers; trend holding from last visit.', 'Saw the new intervention block running in two classrooms.', 'Leadership team meeting weekly on this; data looks steady.'],
+      'Off track': ['Dip since last month. Staffing gap in grade 3.', 'Principal flagged this as a concern; asked for coaching support.', 'Numbers down after winter break; follow up in 3 weeks.'],
+    };
+    let d = new Date('2026-09-01');
+    for (let i = 0; i < 16; i++) {
+      const status = i % 3 === 0 ? 'Off track' : 'On track';
+      d.setDate(d.getDate() - 6);
+      entries.push({
+        id: 'sample-' + Date.now() + '-' + i, created: Date.now() + i,
+        school: schools[i % schools.length], date: d.toISOString().slice(0, 10),
+        metric: DEFAULT_METRICS[(i * 5) % DEFAULT_METRICS.length], status,
+        notes: '[Sample] ' + notes[status][i % 3],
+      });
+    }
+    save(); update();
+  });
+
+  $('clear-all').addEventListener('click', () => {
+    if (!entries.length || !confirm(`Delete all ${entries.length} notes from this browser? This can't be undone.`)) return;
+    entries = []; save(); update();
+  });
+
+  $('f-date').value = new Date().toLocaleDateString('en-CA');
+  update();
+})();
+</script>
+</body>
+</html>
