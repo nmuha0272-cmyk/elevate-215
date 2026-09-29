@@ -50,6 +50,14 @@
   .notice { background: var(--accent-soft); border-radius: 6px; padding: 12px 14px; margin: 0; }
   .sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.05rem; }
   .sentence select { width: auto; min-width: 150px; max-width: 100%; }
+  .find-head { display: grid; gap: 2px; }
+  .hint { margin: 0; color: var(--muted); font-size: .9rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-weight: 600; font-size: .9rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .chip.off[aria-pressed="false"] { color: var(--off); border-color: var(--off); }
+  .chip.on[aria-pressed="false"] { color: var(--on); border-color: var(--on); }
   .summary { color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
   .summary strong { color: var(--fg); }
   .table-wrap { overflow-x: auto; }
@@ -78,6 +86,35 @@
   </header>
 
   <p class="notice" id="conn" hidden></p>
+
+  <section aria-labelledby="find-h">
+    <div class="find-head">
+      <h2 id="find-h">Find notes</h2>
+      <p class="hint">Pick from the menus, or tap a quick pick. The table updates right away.</p>
+    </div>
+    <div class="chips" id="quick" role="group" aria-label="Quick picks"></div>
+    <div class="sentence">
+      <span>Show notes from</span>
+      <select id="q-school" aria-label="School"></select>
+      <span>about</span>
+      <select id="q-metric" aria-label="Metric"></select>
+      <span>that are</span>
+      <select id="q-status" aria-label="Status"></select>
+    </div>
+    <div class="row">
+      <input id="q-text" type="search" placeholder="Search words in notes (optional)" style="max-width:340px">
+      <button type="button" class="secondary" id="q-reset">Show everything</button>
+      <button type="button" class="secondary" id="export" hidden>Download as spreadsheet (CSV)</button>
+      <span id="export-msg" class="msg" aria-live="polite"></span>
+    </div>
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>School</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="6" class="empty">Loading notes…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
 
   <section id="add-section" aria-labelledby="add-h">
     <h2 id="add-h">Add a visit note</h2>
@@ -115,31 +152,6 @@
       </div>
     </form>
   </section>
-
-  <section aria-labelledby="find-h">
-    <h2 id="find-h">Find notes</h2>
-    <div class="sentence">
-      <span>Show notes from</span>
-      <select id="q-school" aria-label="School"></select>
-      <span>about</span>
-      <select id="q-metric" aria-label="Metric"></select>
-      <span>that are</span>
-      <select id="q-status" aria-label="Status"></select>
-    </div>
-    <div class="row">
-      <input id="q-text" type="search" placeholder="Search words in notes (optional)" style="max-width:340px">
-      <button type="button" class="secondary" id="q-reset">Show everything</button>
-      <button type="button" class="secondary" id="export" hidden>Download as spreadsheet (CSV)</button>
-      <span id="export-msg" class="msg" aria-live="polite"></span>
-    </div>
-    <p class="summary" id="summary" aria-live="polite"></p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>School</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
-        <tbody id="rows"><tr><td colspan="6" class="empty">Loading notes…</td></tr></tbody>
-      </table>
-    </div>
-  </section>
 </main>
 
 <script>
@@ -175,7 +187,7 @@
     $('school-list').innerHTML = schools.map(s => `<option value="${esc(s)}">`).join('');
     $('metric-list').innerHTML = uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)]).map(m => `<option value="${esc(m)}">`).join('');
     fillSelect($('q-school'), schools, 'all schools');
-    fillSelect($('q-metric'), uniq(entries.map(e => e.metric)), 'any metric');
+    fillSelect($('q-metric'), uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)]), 'any metric');
     fillSelect($('q-status'), ['On track', 'Off track'], 'on or off track');
   }
 
@@ -188,7 +200,22 @@
       .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.created || 0) - (a.created || 0));
   }
 
+  // One-click shortcuts: status first, then one chip per school. Tapping an active chip clears it.
+  function renderQuick() {
+    const s = $('q-school').value, st = $('q-status').value;
+    const noFilter = !s && !st && !$('q-metric').value && !$('q-text').value.trim();
+    const chip = (label, kind, value, active, cls = '') =>
+      `<button type="button" class="chip ${cls}" data-kind="${kind}" data-value="${esc(value)}" aria-pressed="${active}">${esc(label)}</button>`;
+    $('quick').innerHTML = [
+      chip('All notes', 'all', '', noFilter),
+      chip('Off track only', 'status', 'Off track', st === 'Off track', 'off'),
+      chip('On track only', 'status', 'On track', st === 'On track', 'on'),
+      ...uniq(entries.map(e => e.school)).map(name => chip(name, 'school', name, s === name)),
+    ].join('');
+  }
+
   function render() {
+    renderQuick();
     const list = filtered();
     const off = list.filter(e => e.status === 'Off track').length;
     const schools = new Set(list.map(e => e.school)).size;
@@ -250,6 +277,15 @@
 
   ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).addEventListener('change', render));
   $('q-text').addEventListener('input', render);
+  $('quick').addEventListener('click', ev => {
+    const b = ev.target.closest('.chip');
+    if (!b) return;
+    const { kind, value } = b.dataset;
+    if (kind === 'all') { $('q-reset').click(); return; }
+    const sel = $(kind === 'status' ? 'q-status' : 'q-school');
+    sel.value = sel.value === value ? '' : value;
+    render();
+  });
   $('q-reset').addEventListener('click', () => {
     ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).value = '');
     $('q-text').value = '';
