@@ -130,6 +130,11 @@
         <tbody id="rows"><tr><td colspan="6" class="empty">Loading notes…</td></tr></tbody>
       </table>
     </div>
+    <div class="row" id="sample-row">
+      <button type="button" class="link" id="sample">Load sample notes (for trying it out)</button>
+      <button type="button" class="link danger" id="clear-samples" hidden>Remove sample notes</button>
+      <span id="sample-msg" class="msg" aria-live="polite"></span>
+    </div>
   </section>
 
   <section id="add-section" aria-labelledby="add-h">
@@ -191,7 +196,7 @@
   let db = null, notesCol = null, canWrite = true;
   let entries = [];           // [{id, school, date, metric, status, notes, created}]
   let loaded = false;
-  let pendingDelete = null, pendingTimer = null;
+  let pendingDelete = null, pendingTimer = null, pendingClear = false, clearTimer = null;
 
   const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const norm = s => s.trim().replace(/\s+/g, ' ');
@@ -272,7 +277,7 @@
       : '';
     let empty = 'Loading notes…';
     if (loaded) empty = entries.length ? 'No notes match. Try “Show everything”.'
-      : canWrite ? 'No notes yet. Add the first one above; it will show up here for everyone with the link.'
+      : canWrite ? 'No notes yet. Add the first one below, or load sample notes to try it out.'
       : 'No notes yet. They will show up here once Renée adds them.';
     $('rows').innerHTML = list.length ? list.map(e => `
       <tr>
@@ -286,12 +291,19 @@
       : `<tr><td colspan="6" class="empty">${empty}</td></tr>`;
   }
 
-  function update() { refreshOptions(); render(); }
+  const isSample = e => String(e.id).startsWith('sample-');
+  function update() {
+    refreshOptions(); render();
+    const n = entries.filter(isSample).length;
+    $('clear-samples').hidden = !n;
+    $('clear-samples').textContent = pendingClear ? `Confirm: remove ${n} sample notes` : 'Remove sample notes';
+  }
 
   function showConn(text) { $('conn').textContent = text; $('conn').hidden = false; }
   function setReadOnly(reason) {
     canWrite = false;
     $('add-section').hidden = true;
+    $('sample-row').hidden = true;
     if (reason) showConn(reason);
     render();
   }
@@ -359,6 +371,53 @@
     pendingDelete = null;
     try { await notesCol.doc(id).delete(); }
     catch { showConn('Couldn’t delete that note. Try again.'); render(); }
+  });
+
+  // Sample notes use fixed ids (sample-00 … sample-15), so loading twice just rewrites the same 16.
+  function sampleNotes() {
+    const schools = ['Lincoln Elementary', 'Harmony Charter', 'St. Malachy School', 'Kensington Prep'];
+    const notes = {
+      'On track': ['Principal shared updated numbers; trend holding from last visit.', 'Saw the new intervention block running in two classrooms.', 'Leadership team meeting weekly on this; data looks steady.'],
+      'Off track': ['Dip since last month. Staffing gap in grade 3.', 'Principal flagged this as a concern; asked for coaching support.', 'Numbers down after winter break; follow up in 3 weeks.'],
+    };
+    const d = new Date('2026-09-01T00:00');
+    return Array.from({ length: 16 }, (_, i) => {
+      const status = i % 3 === 0 ? 'Off track' : 'On track';
+      d.setDate(d.getDate() - 6);
+      return ['sample-' + String(i).padStart(2, '0'), {
+        school: schools[i % schools.length], date: isoDay(d),
+        metric: DEFAULT_METRICS[(i * 5) % DEFAULT_METRICS.length], status,
+        notes: '[Sample] ' + notes[status][i % 3],
+        visitedBy: STAFF[i % 4 === 3 ? 1 : 0], funder: [...FUNDERS, ''][i % 3],
+        created: i,
+      }];
+    });
+  }
+
+  $('sample').addEventListener('click', async () => {
+    if (!notesCol) return;
+    $('sample').disabled = true;
+    try {
+      for (const [id, note] of sampleNotes()) await notesCol.doc(id).set(note);
+      flash($('sample-msg'), 'Added 16 sample notes. Everyone with the link sees them too.');
+    } catch { flash($('sample-msg'), 'Couldn’t add all the sample notes. Try again.', true); }
+    finally { $('sample').disabled = false; }
+  });
+
+  $('clear-samples').addEventListener('click', async () => {
+    clearTimeout(clearTimer);
+    if (!pendingClear) {
+      pendingClear = true; update();
+      clearTimer = setTimeout(() => { pendingClear = false; update(); }, 4000);
+      return;
+    }
+    pendingClear = false;
+    $('clear-samples').disabled = true;
+    try {
+      for (const e of entries.filter(isSample)) await notesCol.doc(e.id).delete();
+      flash($('sample-msg'), 'Removed the sample notes.');
+    } catch { flash($('sample-msg'), 'Couldn’t remove all the sample notes. Try again.', true); }
+    finally { $('clear-samples').disabled = false; update(); }
   });
 
   async function exportCsv() {
