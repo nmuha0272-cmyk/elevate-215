@@ -13,6 +13,8 @@ Let Renée quickly log school-visit notes with structured metrics and an on/off-
 - Visit date
 - Metric
 - Status (On track / Off track)
+- Visited by (Renée Okonkwo or Marcus Feld, who both run site visits)
+- Funder (optional, e.g. William Penn Foundation or Lenfest Institute), so Stacy can answer "what did this funder's money do?"
 - Notes
 
 **Show entries** in a simple table, newest first.
@@ -21,9 +23,11 @@ Let Renée quickly log school-visit notes with structured metrics and an on/off-
 - School
 - Metric
 - Status
+- Funder
+- Visit date: any time, the last 30 or 90 days, this school year (since July 1), or between two dates. This covers funders who ask for quarterly or mid-year detail.
 - A word in the notes (optional)
 
-The filter sits at the top of the page. One-click quick picks ("All notes", "Off track only", "On track only", and one button per school) cover the common lookups. The full filter reads as a sentence: "Show notes from [school] about [metric] that are [on/off track]." Stacy has said she doesn't know how to filter in most systems, so the prototype avoids spreadsheet-style filter controls.
+The filter sits at the top of the page. One-click quick picks ("All notes", "Off track only", "On track only", "This school year", and one button per school showing its off-track count) cover the common lookups. The full filter reads as a sentence: "Show notes from [school] about [metric] that are [on/off track] for [funder] visited [when]." Stacy has said she doesn't know how to filter in most systems, so the prototype avoids spreadsheet-style filter controls.
 
 **Extras:**
 - Download the entries currently showing as a CSV file (opens in Excel or Google Sheets).
