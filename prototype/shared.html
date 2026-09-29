@@ -58,6 +58,9 @@
   .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
   .chip.off[aria-pressed="false"] { color: var(--off); border-color: var(--off); }
   .chip.on[aria-pressed="false"] { color: var(--on); border-color: var(--on); }
+  .cell-sub { display: block; color: var(--muted); font-size: .8rem; font-family: inherit; }
+  .sentence input[type=date] { width: auto; }
+  td.date .cell-sub { font-family: var(--font-body); font-size: .8rem; }
   .summary { color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
   .summary strong { color: var(--fg); }
   .table-wrap { overflow-x: auto; }
@@ -100,6 +103,19 @@
       <select id="q-metric" aria-label="Metric"></select>
       <span>that are</span>
       <select id="q-status" aria-label="Status"></select>
+      <span>for</span>
+      <select id="q-funder" aria-label="Funder"></select>
+      <span>visited</span>
+      <select id="q-when" aria-label="Visit date">
+        <option value="">any time</option>
+        <option value="30">in the last 30 days</option>
+        <option value="90">in the last 90 days</option>
+        <option value="year">this school year (since July 1)</option>
+        <option value="custom">between two dates…</option>
+      </select>
+      <span id="q-range" hidden>
+        <input id="q-from" type="date" aria-label="From date"> and <input id="q-to" type="date" aria-label="To date">
+      </span>
     </div>
     <div class="row">
       <input id="q-text" type="search" placeholder="Search words in notes (optional)" style="max-width:340px">
@@ -110,7 +126,7 @@
     <p class="summary" id="summary" aria-live="polite"></p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Date</th><th>School</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date · by</th><th>School · funder</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
         <tbody id="rows"><tr><td colspan="6" class="empty">Loading notes…</td></tr></tbody>
       </table>
     </div>
@@ -141,6 +157,16 @@
             <label><input type="radio" id="f-off" name="status" value="Off track">Off track</label>
           </div>
         </div>
+        <div>
+          <label for="f-by">Visited by</label>
+          <input id="f-by" list="staff-list" required autocomplete="off" value="Renée Okonkwo">
+          <datalist id="staff-list"></datalist>
+        </div>
+        <div>
+          <label for="f-funder">Funder <span class="cell-sub" style="display:inline">(optional)</span></label>
+          <input id="f-funder" list="funder-list" autocomplete="off" placeholder="e.g. William Penn Foundation">
+          <datalist id="funder-list"></datalist>
+        </div>
       </div>
       <div style="margin-top:14px">
         <label for="f-notes">Notes</label>
@@ -157,6 +183,9 @@
 <script>
 (() => {
   const DEFAULT_METRICS = ['Attendance', 'Chronic absenteeism', 'Reading proficiency', 'Math proficiency', 'Enrollment', 'Teacher retention'];
+  // Names from the proposal: Renée and Marcus run site visits; named Elevate 215 funders.
+  const STAFF = ['Renée Okonkwo', 'Marcus Feld'];
+  const FUNDERS = ['William Penn Foundation', 'Lenfest Institute'];
   const $ = id => document.getElementById(id);
 
   let db = null, notesCol = null, canWrite = true;
@@ -189,13 +218,28 @@
     fillSelect($('q-school'), schools, 'all schools');
     fillSelect($('q-metric'), uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)]), 'any metric');
     fillSelect($('q-status'), ['On track', 'Off track'], 'on or off track');
+    fillSelect($('q-funder'), uniq(entries.map(e => e.funder)), 'any funder');
+    $('staff-list').innerHTML = uniq([...STAFF, ...entries.map(e => e.visitedBy)]).map(v => `<option value="${esc(v)}">`).join('');
+    $('funder-list').innerHTML = uniq([...FUNDERS, ...entries.map(e => e.funder)]).map(v => `<option value="${esc(v)}">`).join('');
+  }
+
+  const isoDay = d => d.toLocaleDateString('en-CA');
+  // [from, to] as YYYY-MM-DD strings; '' means open-ended.
+  function dateRange() {
+    const when = $('q-when').value, today = new Date();
+    if (when === '30' || when === '90') { const d = new Date(); d.setDate(d.getDate() - Number(when)); return [isoDay(d), '']; }
+    if (when === 'year') return [`${today.getMonth() >= 6 ? today.getFullYear() : today.getFullYear() - 1}-07-01`, ''];
+    if (when === 'custom') return [$('q-from').value, $('q-to').value];
+    return ['', ''];
   }
 
   function filtered() {
     const s = $('q-school').value, m = $('q-metric').value, st = $('q-status').value;
+    const fu = $('q-funder').value, [from, to] = dateRange();
     const text = $('q-text').value.trim().toLowerCase();
     return entries
       .filter(e => (!s || e.school === s) && (!m || e.metric === m) && (!st || e.status === st))
+      .filter(e => (!fu || e.funder === fu) && (!from || (e.date || '') >= from) && (!to || (e.date || '') <= to))
       .filter(e => !text || [e.school, e.metric, e.notes].join(' ').toLowerCase().includes(text))
       .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.created || 0) - (a.created || 0));
   }
@@ -203,14 +247,18 @@
   // One-click shortcuts: status first, then one chip per school. Tapping an active chip clears it.
   function renderQuick() {
     const s = $('q-school').value, st = $('q-status').value;
-    const noFilter = !s && !st && !$('q-metric').value && !$('q-text').value.trim();
+    const noFilter = !s && !st && !$('q-metric').value && !$('q-funder').value && !$('q-when').value && !$('q-text').value.trim();
     const chip = (label, kind, value, active, cls = '') =>
       `<button type="button" class="chip ${cls}" data-kind="${kind}" data-value="${esc(value)}" aria-pressed="${active}">${esc(label)}</button>`;
     $('quick').innerHTML = [
       chip('All notes', 'all', '', noFilter),
       chip('Off track only', 'status', 'Off track', st === 'Off track', 'off'),
       chip('On track only', 'status', 'On track', st === 'On track', 'on'),
-      ...uniq(entries.map(e => e.school)).map(name => chip(name, 'school', name, s === name)),
+      chip('This school year', 'when', 'year', $('q-when').value === 'year'),
+      ...uniq(entries.map(e => e.school)).map(name => {
+        const off = entries.filter(e => e.school === name && e.status === 'Off track').length;
+        return chip(off ? `${name} · ${off} off track` : name, 'school', name, s === name);
+      }),
     ].join('');
   }
 
@@ -228,8 +276,8 @@
       : 'No notes yet. They will show up here once Renée adds them.';
     $('rows').innerHTML = list.length ? list.map(e => `
       <tr>
-        <td class="date">${esc(fmtDate(e.date))}</td>
-        <td>${esc(e.school)}</td>
+        <td class="date">${esc(fmtDate(e.date))}${e.visitedBy ? `<span class="cell-sub">${esc(e.visitedBy)}</span>` : ''}</td>
+        <td>${esc(e.school)}${e.funder ? `<span class="cell-sub">${esc(e.funder)}</span>` : ''}</td>
         <td>${esc(e.metric)}</td>
         <td><span class="pill ${e.status === 'On track' ? 'on' : 'off'}">${esc(e.status)}</span></td>
         <td class="notes">${esc(e.notes)}</td>
@@ -258,6 +306,8 @@
       metric: canonical($('f-metric').value, uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)])),
       status: f.status.value,
       notes: $('f-notes').value.trim(),
+      visitedBy: canonical($('f-by').value, uniq([...STAFF, ...entries.map(e => e.visitedBy)])),
+      funder: $('f-funder').value.trim() ? canonical($('f-funder').value, uniq([...FUNDERS, ...entries.map(e => e.funder)])) : '',
       created: Date.now(),
     };
     $('save-btn').disabled = true;
@@ -275,19 +325,24 @@
     } finally { $('save-btn').disabled = false; }
   });
 
-  ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).addEventListener('change', render));
+  ['q-school', 'q-metric', 'q-status', 'q-funder', 'q-when'].forEach(id => $(id).addEventListener('change', render));
   $('q-text').addEventListener('input', render);
+  function syncRange() { $('q-range').hidden = $('q-when').value !== 'custom'; }
+  $('q-when').addEventListener('change', syncRange);
+  ['q-from', 'q-to'].forEach(id => $(id).addEventListener('change', render));
   $('quick').addEventListener('click', ev => {
     const b = ev.target.closest('.chip');
     if (!b) return;
     const { kind, value } = b.dataset;
     if (kind === 'all') { $('q-reset').click(); return; }
-    const sel = $(kind === 'status' ? 'q-status' : 'q-school');
+    const sel = $({ status: 'q-status', school: 'q-school', when: 'q-when' }[kind]);
     sel.value = sel.value === value ? '' : value;
+    syncRange();
     render();
   });
   $('q-reset').addEventListener('click', () => {
-    ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).value = '');
+    ['q-school', 'q-metric', 'q-status', 'q-funder', 'q-when'].forEach(id => $(id).value = '');
+    $('q-from').value = ''; $('q-to').value = ''; syncRange();
     $('q-text').value = '';
     render();
   });
@@ -310,7 +365,7 @@
     const downloads = await window.claude?.use?.('downloads');
     if (!downloads) return;
     const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const csv = [['Date', 'School', 'Metric', 'Status', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.notes])]
+    const csv = [['Date', 'School', 'Metric', 'Status', 'Funder', 'Visited by', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.funder, e.visitedBy, e.notes])]
       .map(r => r.map(cell).join(',')).join('\r\n');
     try {
       await downloads.save({ filename: `visit-notes-${new Date().toLocaleDateString('en-CA')}.csv`, data: csv });
