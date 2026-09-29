@@ -1,0 +1,309 @@
+<title>Elevate 215 Visit Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Layout: one narrow column; the log form up top, then a sentence-style finder and the notes table. */
+  :root {
+    --bg: #f3f5f4; --surface: #ffffff; --fg: #17221f; --muted: #5a6964; --line: #d6dedb;
+    --accent: #1d5c63; --accent-fg: #ffffff; --accent-soft: #e2eeef;
+    --on: #1c6b3f; --on-bg: #e1f2e7; --off: #a8321f; --off-bg: #fbe5e0;
+    --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #111816; --surface: #19221f; --fg: #e5ecea; --muted: #97a8a2; --line: #2d3a36;
+    --accent: #6fb7be; --accent-fg: #0d1614; --accent-soft: #1f3336;
+    --on: #7fd3a0; --on-bg: #173325; --off: #f29a86; --off-bg: #3b1d17; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #111816; --surface: #19221f; --fg: #e5ecea; --muted: #97a8a2; --line: #2d3a36;
+    --accent: #6fb7be; --accent-fg: #0d1614; --accent-soft: #1f3336;
+    --on: #7fd3a0; --on-bg: #173325; --off: #f29a86; --off-bg: #3b1d17; color-scheme: dark; }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--font-body); padding-inline: 16px; padding-block: 28px 64px; }
+  main { max-width: 1000px; margin: 0 auto; display: grid; gap: 20px; }
+  header { display: grid; gap: 4px; }
+  .eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0; text-wrap: balance; }
+  h2 { font-size: 1.1rem; margin: 0; }
+  .sub { color: var(--muted); margin: 0; max-width: 65ch; }
+  section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+  label { display: block; font-weight: 600; font-size: .875rem; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  textarea { min-height: 90px; resize: vertical; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .status-pick { display: flex; gap: 8px; }
+  .status-pick label { flex: 1; font-weight: 500; border: 1px solid var(--line); border-radius: 6px; padding: 8px; text-align: center; cursor: pointer; margin: 0; }
+  .status-pick input { position: absolute; opacity: 0; width: 1px; }
+  .status-pick label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .status-pick label:has(input[value="On track"]:checked) { background: var(--on-bg); border-color: var(--on); color: var(--on); font-weight: 700; }
+  .status-pick label:has(input[value="Off track"]:checked) { background: var(--off-bg); border-color: var(--off); color: var(--off); font-weight: 700; }
+  button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); cursor: pointer; }
+  button:disabled { opacity: .6; cursor: default; }
+  button.secondary { background: var(--surface); color: var(--accent); }
+  button.link { border: none; background: none; color: var(--muted); font-weight: 500; padding: 2px 4px; text-decoration: underline; }
+  button.link.danger { color: var(--off); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .msg { font-weight: 600; color: var(--on); }
+  .msg.err { color: var(--off); }
+  .notice { background: var(--accent-soft); border-radius: 6px; padding: 12px 14px; margin: 0; }
+  .sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.05rem; }
+  .sentence select { width: auto; min-width: 150px; max-width: 100%; }
+  .summary { color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
+  .summary strong { color: var(--fg); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.date { font-family: var(--font-data); font-size: .85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.notes { white-space: pre-wrap; min-width: 16ch; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; white-space: nowrap; }
+  .pill.on { background: var(--on-bg); color: var(--on); }
+  .pill.off { background: var(--off-bg); color: var(--off); }
+  .empty { color: var(--muted); text-align: center; padding: 28px 8px; }
+  @media (max-width: 700px) {
+    thead { display: none; }
+    tr { display: grid; gap: 2px; border-bottom: 1px solid var(--line); padding-block: 10px; }
+    td { border: none; padding: 0; }
+    td.empty { padding: 20px 0; }
+  }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">Elevate 215 · Prototype</span>
+    <h1>School Visit Notes</h1>
+    <p class="sub">Renée logs each visit with a metric and an on/off-track status. Anyone with this link can look notes up across schools.</p>
+  </header>
+
+  <p class="notice" id="conn" hidden></p>
+
+  <section id="add-section" aria-labelledby="add-h">
+    <h2 id="add-h">Add a visit note</h2>
+    <form id="entry-form">
+      <div class="grid">
+        <div>
+          <label for="f-school">School</label>
+          <input id="f-school" list="school-list" required autocomplete="off" placeholder="e.g. Lincoln Elementary">
+          <datalist id="school-list"></datalist>
+        </div>
+        <div>
+          <label for="f-date">Visit date</label>
+          <input id="f-date" type="date" required>
+        </div>
+        <div>
+          <label for="f-metric">Metric</label>
+          <input id="f-metric" list="metric-list" required autocomplete="off" placeholder="e.g. Attendance">
+          <datalist id="metric-list"></datalist>
+        </div>
+        <div>
+          <label id="status-l">Status</label>
+          <div class="status-pick" role="radiogroup" aria-labelledby="status-l">
+            <label><input type="radio" id="f-on" name="status" value="On track" required>On track</label>
+            <label><input type="radio" id="f-off" name="status" value="Off track">Off track</label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" placeholder="What you saw on the visit"></textarea>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button type="submit" id="save-btn">Save note</button>
+        <span id="saved-msg" class="msg" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <section aria-labelledby="find-h">
+    <h2 id="find-h">Find notes</h2>
+    <div class="sentence">
+      <span>Show notes from</span>
+      <select id="q-school" aria-label="School"></select>
+      <span>about</span>
+      <select id="q-metric" aria-label="Metric"></select>
+      <span>that are</span>
+      <select id="q-status" aria-label="Status"></select>
+    </div>
+    <div class="row">
+      <input id="q-text" type="search" placeholder="Search words in notes (optional)" style="max-width:340px">
+      <button type="button" class="secondary" id="q-reset">Show everything</button>
+      <button type="button" class="secondary" id="export" hidden>Download as spreadsheet (CSV)</button>
+      <span id="export-msg" class="msg" aria-live="polite"></span>
+    </div>
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>School</th><th>Metric</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="6" class="empty">Loading notes…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const DEFAULT_METRICS = ['Attendance', 'Chronic absenteeism', 'Reading proficiency', 'Math proficiency', 'Enrollment', 'Teacher retention'];
+  const $ = id => document.getElementById(id);
+
+  let db = null, notesCol = null, canWrite = true;
+  let entries = [];           // [{id, school, date, metric, status, notes, created}]
+  let loaded = false;
+  let pendingDelete = null, pendingTimer = null;
+
+  const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const norm = s => s.trim().replace(/\s+/g, ' ');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtDate = d => d ? new Date(d + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  // Reuse existing spelling so "lincoln elementary" doesn't become a second school.
+  const canonical = (v, existing) => { v = norm(v); return existing.find(e => e.toLowerCase() === v.toLowerCase()) || v; };
+
+  function flash(el, text, isErr) {
+    el.textContent = text; el.classList.toggle('err', !!isErr);
+    clearTimeout(el._t); if (!isErr) el._t = setTimeout(() => el.textContent = '', 2500);
+  }
+
+  function fillSelect(sel, options, anyLabel) {
+    const prev = sel.value;
+    sel.innerHTML = `<option value="">${anyLabel}</option>` + options.map(o => `<option>${esc(o)}</option>`).join('');
+    sel.value = options.includes(prev) ? prev : '';
+  }
+
+  function refreshOptions() {
+    const schools = uniq(entries.map(e => e.school));
+    $('school-list').innerHTML = schools.map(s => `<option value="${esc(s)}">`).join('');
+    $('metric-list').innerHTML = uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)]).map(m => `<option value="${esc(m)}">`).join('');
+    fillSelect($('q-school'), schools, 'all schools');
+    fillSelect($('q-metric'), uniq(entries.map(e => e.metric)), 'any metric');
+    fillSelect($('q-status'), ['On track', 'Off track'], 'on or off track');
+  }
+
+  function filtered() {
+    const s = $('q-school').value, m = $('q-metric').value, st = $('q-status').value;
+    const text = $('q-text').value.trim().toLowerCase();
+    return entries
+      .filter(e => (!s || e.school === s) && (!m || e.metric === m) && (!st || e.status === st))
+      .filter(e => !text || [e.school, e.metric, e.notes].join(' ').toLowerCase().includes(text))
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.created || 0) - (a.created || 0));
+  }
+
+  function render() {
+    const list = filtered();
+    const off = list.filter(e => e.status === 'Off track').length;
+    const schools = new Set(list.map(e => e.school)).size;
+    $('summary').innerHTML = entries.length
+      ? `Showing <strong>${list.length}</strong> of ${entries.length} notes across ${schools} school${schools === 1 ? '' : 's'} · <strong>${off}</strong> off track`
+      : '';
+    let empty = 'Loading notes…';
+    if (loaded) empty = entries.length ? 'No notes match. Try “Show everything”.'
+      : canWrite ? 'No notes yet. Add the first one above; it will show up here for everyone with the link.'
+      : 'No notes yet. They will show up here once Renée adds them.';
+    $('rows').innerHTML = list.length ? list.map(e => `
+      <tr>
+        <td class="date">${esc(fmtDate(e.date))}</td>
+        <td>${esc(e.school)}</td>
+        <td>${esc(e.metric)}</td>
+        <td><span class="pill ${e.status === 'On track' ? 'on' : 'off'}">${esc(e.status)}</span></td>
+        <td class="notes">${esc(e.notes)}</td>
+        <td>${canWrite ? `<button type="button" class="link${pendingDelete === e.id ? ' danger' : ''}" data-del="${esc(e.id)}">${pendingDelete === e.id ? 'Confirm delete' : 'Delete'}</button>` : ''}</td>
+      </tr>`).join('')
+      : `<tr><td colspan="6" class="empty">${empty}</td></tr>`;
+  }
+
+  function update() { refreshOptions(); render(); }
+
+  function showConn(text) { $('conn').textContent = text; $('conn').hidden = false; }
+  function setReadOnly(reason) {
+    canWrite = false;
+    $('add-section').hidden = true;
+    if (reason) showConn(reason);
+    render();
+  }
+
+  $('entry-form').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    if (!notesCol) return;
+    const f = ev.target;
+    const note = {
+      school: canonical($('f-school').value, uniq(entries.map(e => e.school))),
+      date: $('f-date').value,
+      metric: canonical($('f-metric').value, uniq([...DEFAULT_METRICS, ...entries.map(e => e.metric)])),
+      status: f.status.value,
+      notes: $('f-notes').value.trim(),
+      created: Date.now(),
+    };
+    $('save-btn').disabled = true;
+    try {
+      await notesCol.add(note);
+      // Keep school + date filled: Renée often logs several metrics from one visit.
+      $('f-metric').value = ''; $('f-notes').value = '';
+      f.querySelectorAll('input[name=status]').forEach(r => r.checked = false);
+      $('f-metric').focus();
+      flash($('saved-msg'), 'Saved. Everyone with the link can see it now.');
+    } catch (e) {
+      if (e?.code === 'invalid_argument') setReadOnly('You can look up notes, but you can’t add them. Ask the page owner to give you Contributor access.');
+      else if (e?.code === 'quota_exceeded') flash($('saved-msg'), 'The notebook is full. Delete old notes to make room.', true);
+      else flash($('saved-msg'), 'Couldn’t save. Check your connection and try again.', true);
+    } finally { $('save-btn').disabled = false; }
+  });
+
+  ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).addEventListener('change', render));
+  $('q-text').addEventListener('input', render);
+  $('q-reset').addEventListener('click', () => {
+    ['q-school', 'q-metric', 'q-status'].forEach(id => $(id).value = '');
+    $('q-text').value = '';
+    render();
+  });
+
+  $('rows').addEventListener('click', async ev => {
+    const id = ev.target.dataset?.del;
+    if (!id || !notesCol) return;
+    clearTimeout(pendingTimer);
+    if (pendingDelete !== id) {
+      pendingDelete = id; render();
+      pendingTimer = setTimeout(() => { pendingDelete = null; render(); }, 4000);
+      return;
+    }
+    pendingDelete = null;
+    try { await notesCol.doc(id).delete(); }
+    catch { showConn('Couldn’t delete that note. Try again.'); render(); }
+  });
+
+  async function exportCsv() {
+    const downloads = await window.claude?.use?.('downloads');
+    if (!downloads) return;
+    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [['Date', 'School', 'Metric', 'Status', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.notes])]
+      .map(r => r.map(cell).join(',')).join('\r\n');
+    try {
+      await downloads.save({ filename: `visit-notes-${new Date().toLocaleDateString('en-CA')}.csv`, data: csv });
+    } catch (e) {
+      if (e?.code === 'rate_limited') flash($('export-msg'), 'A download is already waiting for you.', true);
+      else if (e?.code !== 'declined') flash($('export-msg'), 'Download isn’t available here.', true);
+    }
+  }
+  $('export').addEventListener('click', exportCsv);
+
+  $('f-date').value = new Date().toLocaleDateString('en-CA');
+  update();
+
+  async function start() {
+    if (!window.claude?.use) { loaded = true; setReadOnly('Open this page from its claude.ai link to see and add shared notes.'); return; }
+    const use = n => window.claude.use(n);
+    use('downloads').then(d => { if (d) $('export').hidden = false; });
+    db = await use('db');
+    if (!db) { loaded = true; setReadOnly('Shared notes can’t load in this view. Try reopening the link.'); return; }
+    notesCol = db.collection('notes');
+    const user = await use('user');
+    const w = user ? await user.can('data.write') : null;
+    if (w === false) setReadOnly('You can look up notes, but you can’t add them. Ask the page owner to give you Contributor access.');
+    notesCol.onSnapshot(snap => {
+      loaded = true;
+      entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      update();
+    }, () => { loaded = true; showConn('Lost the connection to shared notes. Reload the page to reconnect.'); render(); });
+  }
+  start();
+})();
+</script>
