@@ -160,26 +160,22 @@
 <script>
 (() => {
   const KEY = 'elevate215.visitNotes.v1';
-  const DEFAULT_METRICS = [
-    'Attendance', 'Chronic absenteeism', 'Reading proficiency', 'Math proficiency', 'Enrollment', 'Teacher retention',
-    'WR.1 Demonstrate Work Readiness', 'WR.2 Create a Standout Resume', 'WR.4 Navigate Interviews',
-    'WR.5 Set and Achieve Financial Goals', 'CCC.2 Work with AI', 'CCC.3 Conduct Research',
-    'CCC.4 Present to an Audience', 'AIE.1 Discover and frame the work', 'AIE.2 Configure, integrate, and build',
-    'AIE.3 Structure and present data', 'AIE.6 Adopt responsibly'
-  ];
-  const CS_SAMPLE_DATA = [
-    { school: 'Launchpad Academy', date: '2026-09-03', metric: 'WR.1 Demonstrate Work Readiness', status: 'On track', notes: 'Students used weekly goal check-ins to improve attendance and follow-through on class expectations.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
-    { school: 'Northside Charter', date: '2026-09-05', metric: 'WR.2 Create a Standout Resume', status: 'On track', notes: 'Students revised bullet points to show measurable impact and stronger evidence of project work.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
-    { school: 'Kensington Prep', date: '2026-09-11', metric: 'WR.4 Navigate Interviews', status: 'Off track', notes: 'Interview practice was uneven; several students struggled to describe their role and results using the STAR method.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
-    { school: 'Riverside Academy', date: '2026-09-14', metric: 'WR.5 Set and Achieve Financial Goals', status: 'On track', notes: 'Students created a personal finance snapshot and were starting to track expenses and savings goals.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
-    { school: 'Harmony School', date: '2026-09-17', metric: 'CCC.2 Work with AI', status: 'On track', notes: 'Students were able to refine prompts and compare AI outputs with their own research for better accuracy.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
-    { school: 'Civic Leadership HS', date: '2026-09-20', metric: 'CCC.3 Conduct Research', status: 'Off track', notes: 'Students needed stronger support in selecting credible sources and organizing evidence across multiple documents.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
-    { school: 'Innovation Prep', date: '2026-09-23', metric: 'CCC.4 Present to an Audience', status: 'On track', notes: 'Students used more concise introductions and stronger evidence in their presentations.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
-    { school: 'Southwest STEM', date: '2026-09-26', metric: 'AIE.1 Discover and frame the work', status: 'On track', notes: 'Students mapped the workflow of a real client problem and identified where AI could add the most value.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
-    { school: 'Future Leaders Academy', date: '2026-09-27', metric: 'AIE.2 Configure, integrate, and build', status: 'Off track', notes: 'Students were still working through API connections and needed more time to test integrations reliably.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
-    { school: 'East River School', date: '2026-09-29', metric: 'AIE.3 Structure and present data', status: 'On track', notes: 'Students cleaned their datasets and built dashboards that communicated trends more clearly to stakeholders.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
-    { school: 'Beacon Academy', date: '2026-09-30', metric: 'AIE.6 Adopt responsibly', status: 'On track', notes: 'The class discussed bias checks, privacy considerations, and clear disclosure when using AI tools.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' }
-  ];
+  const DEFAULT_METRICS = ['Attendance', 'Chronic absenteeism', 'Reading proficiency', 'Math proficiency', 'Enrollment', 'Teacher retention'];
+  // Demo data for trying the page out. The [Sample] prefix keeps fake notes
+  // visibly separate from Renée's real ones, in the table and in CSV exports.
+  const SAMPLE_NOTES = [
+    { school: 'Launchpad Academy', date: '2026-09-03', metric: 'Attendance', status: 'On track', notes: 'Students used weekly goal check-ins to improve attendance and follow-through on class expectations.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
+    { school: 'Northside Charter', date: '2026-09-05', metric: 'Reading proficiency', status: 'On track', notes: 'Students revised their reading responses to cite stronger evidence from the text; comprehension checks improved week over week.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
+    { school: 'Kensington Prep', date: '2026-09-11', metric: 'Chronic absenteeism', status: 'Off track', notes: 'Absence still above target; several students missing Monday sessions and not completing the make-up work.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
+    { school: 'Riverside Academy', date: '2026-09-14', metric: 'Math proficiency', status: 'On track', notes: 'Math growth checks improved after the new small-group block; most students moved up at least one band.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
+    { school: 'Harmony School', date: '2026-09-17', metric: 'Reading proficiency', status: 'On track', notes: 'Students used AI as a reading aid, then checked each output against the source text and caught the errors themselves.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
+    { school: 'Civic Leadership HS', date: '2026-09-20', metric: 'Chronic absenteeism', status: 'Off track', notes: 'Attendance slipped again this month; the counselor flagged a group of students who have stopped coming in on Thursdays.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
+    { school: 'Innovation Prep', date: '2026-09-23', metric: 'Math proficiency', status: 'On track', notes: 'Students explained their reasoning more clearly in math talk, using evidence from the problem rather than the answer alone.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
+    { school: 'Southwest STEM', date: '2026-09-26', metric: 'Attendance', status: 'On track', notes: 'Staff and students mapped the daily attendance workflow and found where homeroom check-ins were slipping.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
+    { school: 'Future Leaders Academy', date: '2026-09-27', metric: 'Enrollment', status: 'Off track', notes: 'Enrollment follow-up is behind; the registrar still has families who never returned paperwork.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' },
+    { school: 'East River School', date: '2026-09-29', metric: 'Chronic absenteeism', status: 'On track', notes: 'The school cleaned its attendance data and now reports chronic absence weekly to grade teams, which has helped them target outreach.', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute' },
+    { school: 'Beacon Academy', date: '2026-09-30', metric: 'Teacher retention', status: 'On track', notes: 'Discussed what makes a fair grade and how staff handle make-up work consistently; turnover in the department has been low this year.', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation' }
+  ].map(n => ({ ...n, notes: '[Sample] ' + n.notes }));
   // Names from the proposal: Renée and Marcus run site visits; named Elevate 215 funders.
   const STAFF = ['Renée Okonkwo', 'Marcus Feld'];
   const FUNDERS = ['William Penn Foundation', 'Lenfest Institute'];
@@ -351,14 +347,13 @@
   });
 
   $('sample').addEventListener('click', () => {
-    for (let i = 0; i < CS_SAMPLE_DATA.length; i++) {
-      const item = CS_SAMPLE_DATA[i];
-      entries.push({
-        id: 'sample-' + String(i).padStart(2, '0'),
-        created: Date.now() + i,
-        ...item,
-      });
-    }
+    // Fixed ids, so skip any already loaded: clicking twice must not double up.
+    const existing = new Set(entries.map(e => e.id));
+    SAMPLE_NOTES.forEach((item, i) => {
+      const id = 'sample-' + String(i).padStart(2, '0');
+      if (existing.has(id)) return;
+      entries.push({ id, created: Date.now() + i, ...item });
+    });
     save(); update();
   });
 

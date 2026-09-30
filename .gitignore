@@ -1,4 +1,4 @@
-
-#  school data
+# School data stays local
 school-data/
-node_modules/ 
+
+node_modules/
