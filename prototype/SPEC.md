@@ -46,6 +46,7 @@ The filter sits at the top of the page. One-click quick picks ("All notes", "Off
 
 ## Known limits
 - **Sharing:** the shared page is private until its owner shares it from the page's Share menu. Renée needs **Contributor** access (or higher) to add notes. Stacy can look them up with **Viewer** access.
+- **Storage depends on a claude.ai capability.** The shared version keeps notes in the page's own storage. Claude's published artifact docs describe artifacts as static pages with no backend, and list only connector calls and file downloads as runtime capabilities — a shared notes store isn't among them. The code handles it failing (the page says so rather than hanging), but **the smoke test in `TRIAL.md` Step 0 has to pass before the trial starts.** If it doesn't, the shared version is not viable as built and the fallback is the offline page plus a manual CSV hand-off.
 - **Offline version:** notes stay in one browser, and clearing browser data deletes them.
 - There's no editing. To fix a note, delete it and add it again.
 

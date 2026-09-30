@@ -15,6 +15,17 @@ Everything below is a throwaway test. If it works, we build something real. If i
 
 Send both of them the link.
 
+### Smoke test — do this before you send it
+
+Thirty seconds, and it catches the one failure that would kill the trial.
+
+1. Open your own copy of the link.
+2. Add one throwaway note — any school, any metric, On track.
+3. Confirm it appears in the table straight away.
+4. Delete it.
+
+If the page instead shows *"Shared notes aren't available on this page right now"* or sits on **Loading notes…** forever, the page's storage isn't available on the account. Nothing was saved, and the trial can't run. **Stop and fix this before Renée or Stacy opens the link** — an empty table looks identical to "nothing logged yet", so they will just report that the tool is broken.
+
 > The offline `index.html` is a backup for demos on a laptop. It stores notes in that one browser only, so **do not use it for the trial** — Renée's notes would not reach Stacy.
 
 ---
