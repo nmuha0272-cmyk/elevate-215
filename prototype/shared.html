@@ -451,26 +451,32 @@
   async function start() {
     if (!window.claude?.use) { loaded = true; setReadOnly('Open this page from its claude.ai link to see and add shared notes.'); return; }
     const use = n => window.claude.use(n);
+    // Optional: just hides the download button when the capability is absent.
+    use('downloads').then(d => { if (d) $('export').hidden = false; }, () => {});
     try {
-      // Optional: just hides the download button when the capability is absent.
-      use('downloads').then(d => { if (d) $('export').hidden = false; }, () => {});
       db = await use('db');
       if (!db) { loaded = true; setReadOnly('Shared notes can’t load in this view. Try reopening the link.'); return; }
       notesCol = db.collection('notes');
-      const user = await use('user');
-      const w = user ? await user.can('data.write') : null;
-      if (w === false) setReadOnly('You can look up notes, but you can’t add them. Ask the page owner to give you Contributor access.');
-      notesCol.onSnapshot(snap => {
-        loaded = true;
-        entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        update();
-      }, () => { loaded = true; showConn('Lost the connection to shared notes. Reload the page to reconnect.'); render(); });
     } catch {
       // Storage can be missing or switched off for the account. Say so rather
       // than leaving Renée staring at "Loading notes…" forever.
       loaded = true;
       setReadOnly('Shared notes aren’t available on this page right now. Reload the link, and ask the page owner to check sharing settings if it keeps happening.');
+      return;
     }
+    // Subscribe before checking permissions: looking notes up has to work even
+    // when the permission check doesn't, or a Viewer sees an empty page.
+    notesCol.onSnapshot(snap => {
+      loaded = true;
+      entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      update();
+    }, () => { loaded = true; showConn('Lost the connection to shared notes. Reload the page to reconnect.'); render(); });
+    // If this fails, leave canWrite alone and let the save attempt report the
+    // problem itself, rather than hiding notes that are perfectly readable.
+    try {
+      const user = await use('user');
+      if (user && await user.can('data.write') === false) setReadOnly('You can look up notes, but you can’t add them. Ask the page owner to give you Contributor access.');
+    } catch {}
   }
   start();
 })();

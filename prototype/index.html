@@ -341,7 +341,7 @@
       .map(r => r.map(cell).join(',')).join('\r\n');
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
-      download: `visit-notes-${new Date().toISOString().slice(0, 10)}.csv`,
+      download: `visit-notes-${isoDay(new Date())}.csv`,
     });
     a.click(); URL.revokeObjectURL(a.href);
   });
