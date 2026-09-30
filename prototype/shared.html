@@ -433,7 +433,13 @@
   async function exportCsv() {
     const downloads = await window.claude?.use?.('downloads');
     if (!downloads) return;
-    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    // A note starting with = + - @ is executed as a formula by Excel and Sheets.
+    // Prefix a single quote so funder-report cells stay text.
+    const cell = v => {
+      let s = String(v ?? '').replace(/"/g, '""');
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return `"${s}"`;
+    };
     const csv = [['Date', 'School', 'Metric', 'Status', 'Funder', 'Visited by', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.funder, e.visitedBy, e.notes])]
       .map(r => r.map(cell).join(',')).join('\r\n');
     try {

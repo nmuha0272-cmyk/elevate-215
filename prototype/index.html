@@ -193,7 +193,7 @@
   }
   const uniq = arr => [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const norm = s => s.trim().replace(/\s+/g, ' ');
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmtDate = d => d ? new Date(d + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
   // Reuse existing spelling/casing so "lincoln elem" and "Lincoln Elem" don't split into two schools.
@@ -239,7 +239,7 @@
       .filter(e => (!s || e.school === s) && (!m || e.metric === m) && (!st || e.status === st))
       .filter(e => (!fu || e.funder === fu) && (!from || (e.date || '') >= from) && (!to || (e.date || '') <= to))
       .filter(e => !text || [e.school, e.metric, e.notes].join(' ').toLowerCase().includes(text))
-      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.created - a.created);
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.created || 0) - (a.created || 0));
   }
 
   // One-click shortcuts: status first, then one chip per school. Tapping an active chip clears it.
@@ -275,7 +275,7 @@
         <td data-label="Metric">${esc(e.metric)}</td>
         <td><span class="pill ${e.status === 'On track' ? 'on' : 'off'}">${esc(e.status)}</span></td>
         <td class="notes">${esc(e.notes)}</td>
-        <td><button type="button" class="link" data-del="${e.id}" aria-label="Delete note">Delete</button></td>
+        <td><button type="button" class="link" data-del="${esc(e.id)}" aria-label="Delete note">Delete</button></td>
       </tr>`).join('')
       : `<tr><td colspan="6" class="empty">${entries.length ? 'No notes match. Try "Show everything".' : 'No notes yet. Add one below, or load sample notes to try it out.'}</td></tr>`;
   }
@@ -336,7 +336,13 @@
   });
 
   $('export').addEventListener('click', () => {
-    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    // A note starting with = + - @ is executed as a formula by Excel and Sheets.
+    // Prefix a single quote so funder-report cells stay text.
+    const cell = v => {
+      let s = String(v ?? '').replace(/"/g, '""');
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return `"${s}"`;
+    };
     const csv = [['Date', 'School', 'Metric', 'Status', 'Funder', 'Visited by', 'Notes'], ...filtered().map(e => [e.date, e.school, e.metric, e.status, e.funder, e.visitedBy, e.notes])]
       .map(r => r.map(cell).join(',')).join('\r\n');
     const a = Object.assign(document.createElement('a'), {
