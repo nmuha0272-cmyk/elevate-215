@@ -59,7 +59,7 @@ exercising it; never report "tests pass".
 
 ## Values that break silently if changed
 
-- Status is exactly `"On track"` / `"Off track"`. String equality, the CSV export, the API's status check, and
+- Status is exactly `"On track"` / `"Off track"` / `"Failed"`. String equality, the CSV export, the API's status check, and
   the CSS `:has(input[value="On track"]:checked)` styling all depend on those exact strings.
 - A report's status is exactly `"Not reviewed"` / `"Approved"` / `"Needs changes"`, and only the last two can
   be decided to — `PATCH` rejects `"Not reviewed"` deliberately, because a decision can't be taken back.

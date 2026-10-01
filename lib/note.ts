@@ -1,4 +1,12 @@
-export type Status = 'On track' | 'Off track';
+export type Status = 'On track' | 'Off track' | 'Failed';
+
+export const STATUSES: Status[] = ['On track', 'Off track', 'Failed'];
+
+export const STATUS_CLASS: Record<Status, 'on' | 'off' | 'fail'> = {
+  'On track': 'on',
+  'Off track': 'off',
+  Failed: 'fail',
+};
 
 export type Note = {
   id: string;

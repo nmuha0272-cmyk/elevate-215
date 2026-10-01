@@ -22,6 +22,7 @@ const SEEDS: Seed[] = [
   { school: 'BELMONT CS', date: '2026-09-27', metric: 'Enrollment', status: 'Off track', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation', notes: 'Enrollment follow-up is behind; the registrar still has families who never returned paperwork.' },
   { school: 'LEWIS C CASSIDY ACADEMICS PLUS SCH', date: '2026-09-29', metric: 'Chronic absenteeism', status: 'On track', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute', notes: 'The school cleaned its attendance data and now reports chronic absence weekly to grade teams, which has helped them target outreach.' },
   { school: 'PHILADELPHIA ACADEMY CS', date: '2026-09-30', metric: 'Teacher retention', status: 'On track', visitedBy: 'Renée Okonkwo', funder: 'William Penn Foundation', notes: 'Discussed what makes a fair grade and how staff handle make-up work consistently; turnover in the department has been low this year.' },
+  { school: 'MARTIN LUTHER KING HS', date: '2026-10-01', metric: 'Graduation rate', status: 'Failed', visitedBy: 'Marcus Feld', funder: 'Lenfest Institute', notes: 'The data pull failed twice this week; the dashboard still shows last term numbers, so there is nothing reliable to report on yet.' },
 ];
 
 export const SAMPLE_IDS = SEEDS.map((_, i) => `sample-${String(i).padStart(2, '0')}`);

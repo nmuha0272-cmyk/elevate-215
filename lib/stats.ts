@@ -50,12 +50,13 @@ export function reportsByMonth(reports: Report[], keys: string[]): Point[] {
   return tally(keys, m);
 }
 
-export type Slice = { label: string; count: number; cls: 'on' | 'off' };
+export type Slice = { label: string; count: number; cls: 'on' | 'off' | 'fail' };
 
 export function statusSplit(notes: Note[]): Slice[] {
   return [
     { label: 'On track', count: notes.filter(n => n.status === 'On track').length, cls: 'on' },
     { label: 'Off track', count: notes.filter(n => n.status === 'Off track').length, cls: 'off' },
+    { label: 'Failed', count: notes.filter(n => n.status === 'Failed').length, cls: 'fail' },
   ];
 }
 

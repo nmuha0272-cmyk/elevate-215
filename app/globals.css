@@ -3,6 +3,7 @@
   --bg: #03050a; --surface: #0b1220; --card: #0f1929; --fg: #f3f7fc; --fg-dim: #c6d3e4; --muted: #8fa0b8; --line: #1b2637;
   --accent: #4c8dff; --accent-fg: #03060d; --accent-soft: #0f2340;
   --on: #34d399; --on-bg: #0a2a1f; --off: #fb7185; --off-bg: #34121c;
+  --fail: #a78bfa; --fail-bg: #241538;
   --c-cyan: #45bdf2; --c-green: #3ddc97; --c-gold: #f0b429; --c-pink: #f472b6; --c-purple: #7f8cff;
   --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -52,6 +53,7 @@ main { max-width: none; margin: 0; display: grid; gap: 18px; }
 .donut { width: 150px; height: 150px; flex: none; }
 .arc.on { fill: var(--c-green); }
 .arc.off { fill: var(--c-pink); }
+.arc.fail { fill: var(--fail); }
 .donut-value { fill: var(--fg); font-size: 24px; font-weight: 700; font-family: var(--font-body); }
 .donut-caption { fill: var(--muted); font-size: 11px; font-family: var(--font-body); }
 .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: .85rem; }
@@ -60,6 +62,7 @@ main { max-width: none; margin: 0; display: grid; gap: 18px; }
 .swatch { width: 10px; height: 10px; border-radius: 3px; }
 .swatch.on { background: var(--c-green); }
 .swatch.off { background: var(--c-pink); }
+.swatch.fail { background: var(--fail); }
 header { display: grid; gap: 4px; }
 .eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 h1 { font-size: 1.75rem; line-height: 1.2; margin: 0; text-wrap: balance; }
@@ -80,6 +83,7 @@ textarea { min-height: 90px; resize: vertical; }
 .status-pick label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .status-pick label:has(input[value="On track"]:checked) { background: var(--on-bg); border-color: var(--on); color: var(--on); font-weight: 700; }
 .status-pick label:has(input[value="Off track"]:checked) { background: var(--off-bg); border-color: var(--off); color: var(--off); font-weight: 700; }
+.status-pick label:has(input[value="Failed"]:checked) { background: var(--fail-bg); border-color: var(--fail); color: var(--fail); font-weight: 700; }
 button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); cursor: pointer; }
 button:disabled { opacity: .6; cursor: default; }
 button.secondary { background: var(--surface); color: var(--accent); }
@@ -100,6 +104,7 @@ button.link.danger { color: var(--off); }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .chip.off[aria-pressed="false"] { color: var(--off); border-color: var(--off); }
 .chip.on[aria-pressed="false"] { color: var(--on); border-color: var(--on); }
+.chip.fail[aria-pressed="false"] { color: var(--fail); border-color: var(--fail); }
 .cell-sub { display: block; color: var(--muted); font-size: .8rem; font-family: inherit; }
 .summary { color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
 .summary strong { color: var(--fg); }
@@ -115,6 +120,7 @@ td.actions { white-space: nowrap; }
 .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; white-space: nowrap; }
 .pill.on { background: var(--on-bg); color: var(--on); }
 .pill.off { background: var(--off-bg); color: var(--off); }
+.pill.fail { background: var(--fail-bg); color: var(--fail); }
 .empty { color: var(--muted); text-align: center; padding: 28px 8px; }
 h3 { font-size: .95rem; margin: 0; }
 .report-group { display: grid; gap: 10px; }

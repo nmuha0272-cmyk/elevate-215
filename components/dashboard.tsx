@@ -107,7 +107,7 @@ function Donut({ notes }: { notes: Note[] }) {
     <article className="card panel-card">
       <header className="card-head">
         <h2>Status breakdown</h2>
-        <p className="card-sub">Every note, on or off track.</p>
+        <p className="card-sub">Every note, on or off track, or failed.</p>
       </header>
       {total === 0 ? (
         <p className="empty">No notes yet, so there is nothing to split.</p>

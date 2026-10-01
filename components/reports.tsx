@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { describeFilters, type Filters } from '@/lib/filter';
 import type { Note } from '@/lib/note';
+import { STATUS_CLASS } from '@/lib/note';
 import { DECISIONS, isWaiting, notesFor, type Report, type ReviewStatus } from '@/lib/report';
 
 const CONFIRM_MS = 4000;
@@ -138,7 +139,7 @@ export default function Reports({ reports, setReports, notes, shown, filters }: 
                 <li key={n.id}>
                   <span className="cell-sub">{fmtDate(n.date)} · {n.visitedBy}</span>
                   <span className="report-note-school">{n.school}{n.funder && <span className="cell-sub">{n.funder}</span>}</span>
-                  <span className={`pill ${pillClass(n.status === 'On track' ? 'Approved' : 'Needs changes')}`}>{n.metric} · {n.status}</span>
+                  <span className={`pill ${STATUS_CLASS[n.status]}`}>{n.metric} · {n.status}</span>
                   {n.notes && <span className="report-note-text">{n.notes}</span>}
                 </li>
               ))}

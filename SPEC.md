@@ -14,7 +14,7 @@ Let Renée quickly log school-visit notes with structured metrics and an on/off-
 - School, picked from the 301 schools in the rollup CSV at the repo root, so the same school can't be logged under two spellings. A school that isn't in the rollup can still be typed in.
 - Visit date
 - Metric
-- Status (On track / Off track)
+- Status (On track / Off track, plus Failed when the visit couldn't be assessed)
 - Visited by (Renée Okonkwo or Marcus Feld, who both run site visits)
 - Funder (optional, e.g. William Penn Foundation or Lenfest Institute), so Stacy can answer "what did this funder's money do?"
 - Notes

@@ -7,11 +7,11 @@ import type { Tab } from '@/components/app-shell';
 import { toCsv } from '@/lib/csv';
 import { emptyFilters, filterNotes, isUnfiltered, type Filters } from '@/lib/filter';
 import type { Note, Status } from '@/lib/note';
+import { STATUSES, STATUS_CLASS } from '@/lib/note';
 import { DEFAULT_METRICS, FUNDERS, STAFF } from '@/lib/options';
 import { isSample } from '@/lib/sample-notes';
 import type { Report } from '@/lib/report';
 
-const STATUSES: Status[] = ['On track', 'Off track'];
 const CONFIRM_MS = 4000;
 
 const uniq = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -106,7 +106,7 @@ export default function VisitNotes({ initialNotes, schools, tab, search, setSear
     if (!form.school.trim()) missing.push('school');
     if (!form.date) missing.push('visit date');
     if (!form.metric.trim()) missing.push('metric');
-    if (!form.status) missing.push('On track or Off track');
+    if (!form.status) missing.push('On track, Off track or Failed');
     if (missing.length) {
       setFormError(`Still needed before saving: ${missing.join(', ')}.`);
       if (!form.school.trim()) document.getElementById('f-school')?.focus();
@@ -166,6 +166,7 @@ export default function VisitNotes({ initialNotes, schools, tab, search, setSear
     { label: 'All notes', kind: 'all', value: '', active: isUnfiltered(filters), cls: '' },
     { label: 'Off track only', kind: 'status', value: 'Off track', active: filters.status === 'Off track', cls: 'off' },
     { label: 'On track only', kind: 'status', value: 'On track', active: filters.status === 'On track', cls: 'on' },
+    { label: 'Failed only', kind: 'status', value: 'Failed', active: filters.status === 'Failed', cls: 'fail' },
     { label: 'This school year', kind: 'when', value: 'year', active: filters.when === 'year', cls: '' },
     ...noteSchools.map(name => {
       const off = notes.filter(n => n.school === name && n.status === 'Off track').length;
@@ -220,7 +221,7 @@ export default function VisitNotes({ initialNotes, schools, tab, search, setSear
           </select>
           <span>that are</span>
           <select aria-label="Status" value={filters.status} onChange={e => setFilter('status', e.target.value)}>
-            <option value="">on or off track</option>
+            <option value="">any status</option>
             {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <span>for</span>
@@ -276,7 +277,7 @@ export default function VisitNotes({ initialNotes, schools, tab, search, setSear
                   <td className="date" data-label="Date">{fmtDate(n.date)}{n.visitedBy && <span className="cell-sub">{n.visitedBy}</span>}</td>
                   <td data-label="School">{n.school}{n.funder && <span className="cell-sub">{n.funder}</span>}</td>
                   <td data-label="Metric">{n.metric}</td>
-                  <td data-label="Status"><span className={`pill ${n.status === 'On track' ? 'on' : 'off'}`}>{n.status}</span></td>
+                  <td data-label="Status"><span className={`pill ${STATUS_CLASS[n.status]}`}>{n.status}</span></td>
                   <td className="notes" data-label="Notes">{n.notes}</td>
                   <td className="actions">
                     <button

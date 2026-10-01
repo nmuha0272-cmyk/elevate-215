@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { emptyFilters, filterNotes, type Filters, type When } from '@/lib/filter';
-import { canonical, normalize, type Note, type Status } from '@/lib/note';
+import { canonical, normalize, STATUSES, type Note, type Status } from '@/lib/note';
 import { DEFAULT_METRICS, FUNDERS, STAFF } from '@/lib/options';
 import { loadSchools } from '@/lib/schools';
 import { readNotes, writeNotes } from '@/lib/store';
-
-const STATUSES: Status[] = ['On track', 'Off track'];
 
 const WHENS: string[] = ['', '30', '90', 'year', 'custom'];
 
