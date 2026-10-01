@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { emptyFilters, filterNotes } from './filter.ts';
+import type { Note } from './note.ts';
 import { SAMPLE_IDS, buildSampleNotes } from './sample-notes.ts';
 
 describe('filterNotes with no filters selected', () => {
@@ -34,6 +35,35 @@ describe('filterNotes with no filters selected', () => {
       all.map(n => n.id),
       before,
       'filterNotes must not reorder the array it was given',
+    );
+  });
+});
+
+describe('filterNotes ordering', () => {
+  it('breaks a date tie on created, newest first', () => {
+    const note = (id: string, date: string, created: number): Note => ({
+      id,
+      school: 'LINCOLN HS',
+      date,
+      metric: 'Attendance',
+      status: 'On track',
+      notes: 'tie',
+      visitedBy: 'Renée Okonkwo',
+      funder: 'William Penn Foundation',
+      created,
+    });
+
+    const input = [
+      note('a', '2026-09-11', 100),
+      note('b', '2026-09-11', 300),
+      note('c', '2026-09-11', 200),
+      note('d', '2026-09-09', 400),
+    ];
+
+    assert.deepEqual(
+      filterNotes(input, emptyFilters).map(n => n.id),
+      ['b', 'c', 'a', 'd'],
+      'same date sorts by created descending, and a later date still outranks created',
     );
   });
 });
