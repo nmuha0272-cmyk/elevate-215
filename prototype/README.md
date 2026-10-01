@@ -1,8 +1,15 @@
 # School Visit Notes (prototype)
 
+> **Superseded.** The app that shipped is the Next.js one at the repo root — see the root `README.md` to run it.
+> This folder keeps `TRIAL.md` (the trial runbook) and the two HTML files this replaced, for reference. The
+> requirements moved up to the repo root as [`SPEC.md`](../SPEC.md) and [`SPEC-2-REVIEW.md`](../SPEC-2-REVIEW.md).
+> `shared.html` no longer works as a shared notes store; don't publish it again.
+
 A throwaway prototype to test one workflow change from the funder-reporting proposal: Renée adds a metric and an on/off-track status next to each visit note, so Stacy can pull up what she needs without reading every note.
 
 **Running the trial:** see [`TRIAL.md`](TRIAL.md) for the step-by-step runbook, including the before-they-start baseline question and what to record.
+
+**Requirements:** [`SPEC.md`](../SPEC.md) for the notes and [`SPEC-2-REVIEW.md`](../SPEC-2-REVIEW.md) for the review step before a report goes out, both at the repo root.
 
 **Shared version (use this one):** `shared.html` is published as a private claude.ai page, so notes are saved online and Stacy can see Renée's notes from her own computer. Share it from the page's Share menu: give Renée Contributor access so she can add notes. Stacy only needs Viewer access to look them up.
 

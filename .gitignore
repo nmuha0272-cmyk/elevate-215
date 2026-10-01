@@ -2,3 +2,10 @@
 school-data/
 
 node_modules/
+
+# Next.js build output and the JSON note file the app writes
+.next/
+out/
+data/
+*.tsbuildinfo
+next-env.d.ts

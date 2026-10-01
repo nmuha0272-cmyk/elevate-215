@@ -1,5 +1,7 @@
 # Spec: School Visit Notes Prototype
 
+Companion to [`SPEC-2-REVIEW.md`](SPEC-2-REVIEW.md), which adds the review step before a report goes out.
+
 ## Goal
 Let Renée quickly log school-visit notes with structured metrics and an on/off-track status, so Stacy can filter and review information across schools without reading every note by hand.
 
@@ -9,7 +11,7 @@ Let Renée quickly log school-visit notes with structured metrics and an on/off-
 
 ## What it does
 **Add a school-visit entry with:**
-- School
+- School, picked from the 301 schools in the rollup CSV at the repo root, so the same school can't be logged under two spellings. A school that isn't in the rollup can still be typed in.
 - Visit date
 - Metric
 - Status (On track / Off track)
@@ -31,24 +33,28 @@ The filter sits at the top of the page. One-click quick picks ("All notes", "Off
 
 **Extras:**
 - Download the entries currently showing as a CSV file (opens in Excel or Google Sheets).
-- Load sample notes for demos, marked `[Sample]`. On the shared page, "Remove sample notes" deletes only the samples and leaves real notes alone.
-- Delete a note. The offline version can also delete all notes at once.
+- Load sample notes for demos, marked `[Sample]`. "Remove sample notes" deletes only the samples and leaves real notes alone.
+- Delete a note.
 
-## Two versions
-- **Shared (`shared.html`), the one to use:** published as a private claude.ai page. Notes are saved online with the page, so Renée adds them and Stacy looks them up from her own computer with the same link.
-- **Offline (`index.html`):** open the file in any browser. Notes are saved in that browser only.
+## One version
+One Next.js app, at a link Renée and Stacy both open: `npm run dev`, then hand them the URL. Notes are
+saved in a JSON file beside the app, so Renée adds them on her machine and Stacy looks them up from her own
+computer with the same link. There is no per-person login, so everyone who has the link can add and delete.
+
+The two-file prototype this replaced (`shared.html` and `index.html`) is kept in `prototype/` for reference.
 
 ## Scope
 - This is a throwaway prototype for testing the workflow.
-- No login beyond claude.ai's own sharing.
-- No real database. The shared version uses the claude.ai page's built-in storage; the offline version uses the browser's local storage.
+- No login and no permissions. Anyone with the link can add and delete notes.
+- No real database. Notes are a JSON file (`data/notes.json`) read and written by the app.
 - The goal is to find out whether the workflow is useful before investing in a production version.
 
 ## Known limits
-- **Sharing:** the shared page is private until its owner shares it from the page's Share menu. Renée needs **Contributor** access (or higher) to add notes. Stacy can look them up with **Viewer** access.
-- **Storage depends on a claude.ai capability.** The shared version keeps notes in the page's own storage. Claude's published artifact docs describe artifacts as static pages with no backend, and list only connector calls and file downloads as runtime capabilities — a shared notes store isn't among them. The code handles it failing (the page says so rather than hanging), but **the smoke test in `TRIAL.md` Step 0 has to pass before the trial starts.** If it doesn't, the shared version is not viable as built and the fallback is the offline page plus a manual CSV hand-off.
-- **Offline version:** notes stay in one browser, and clearing browser data deletes them.
+- **Storage is a file, not a service.** The notes live in `data/notes.json` on whichever machine is running the app, so the trial only works while that machine is on and both of them can reach it. Copy the CSV out before you lose anything. There is no backup.
+- **The link is the only gate.** No Contributor/Viewer distinction — anyone who has the URL can delete a note, including Renée's. That is deliberate for a two-person trial and is not a security model.
+- **No live sync.** A note someone else adds shows up when you refresh, not while you are looking at the page.
 - There's no editing. To fix a note, delete it and add it again.
+- The earlier offline version could delete all notes at once. This one can't, because it is the shared version. Say so rather than adding it.
 
 ## Open questions (from the proposal)
 - Where should the tag live long term?

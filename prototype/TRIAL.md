@@ -6,27 +6,24 @@ Everything below is a throwaway test. If it works, we build something real. If i
 
 ---
 
-## Step 0 — Publish and share (you only, ~10 min)
+## Step 0 — Start the app and share the link (you only, ~10 min)
 
-1. Open `shared.html` and publish it as a page on claude.ai.
-2. From the page's **Share** menu, share it. The page is private until you do this.
-3. Give **Renée Okonkwo → Contributor** (she needs to add notes).
-4. Give **Stacy → Viewer** (she only needs to look notes up).
-
-Send both of them the link.
+1. `npm install`, then `npm run dev` in this repository.
+2. Open http://localhost:3000 yourself. It opens on the **Dashboard**; click **Notes** in the tab bar and confirm the table is empty.
+3. Work out who can reach that address — Renée and Stacy need the link, and if they are not on the same network you need somewhere it is hosted. **The notes are a file on the machine running this**, so it has to stay on for the whole two weeks.
+4. Send both of them the link.
 
 ### Smoke test — do this before you send it
 
 Thirty seconds, and it catches the one failure that would kill the trial.
 
 1. Open your own copy of the link.
-2. Add one throwaway note — any school, any metric, On track.
-3. Confirm it appears in the table straight away.
-4. Delete it.
+2. Click **Add a note** in the tab bar and add one throwaway note — any school, any metric, On track.
+3. Click **Notes** and confirm it appears in the table straight away.
+4. **Open the same link in a private/incognito window and confirm the note is there too.** This is the step that matters: the old prototype's shared page never actually worked, and a note that only lives in one browser looks identical to a working page.
+5. Delete the throwaway note.
 
-If the page instead shows *"Shared notes aren't available on this page right now"* or sits on **Loading notes…** forever, the page's storage isn't available on the account. Nothing was saved, and the trial can't run. **Stop and fix this before Renée or Stacy opens the link** — an empty table looks identical to "nothing logged yet", so they will just report that the tool is broken.
-
-> The offline `index.html` is a backup for demos on a laptop. It stores notes in that one browser only, so **do not use it for the trial** — Renée's notes would not reach Stacy.
+If the note doesn't survive into the second window, the two of them are not looking at the same notes and the trial can't run. If the page won't load at all, the server isn't running — the notes are not saved anywhere else.
 
 ---
 
@@ -127,8 +124,12 @@ These are deliberate scope choices for a prototype:
 - **No editing.** Fixing a note means deleting it and adding it again.
 - **Notes are never archived or summarised.** Nothing tells you a school has been off track for three months running — you still have to look.
 - **One status per metric per visit.** No "partly in place."
-- **The page lives in your claude.ai account.** If that goes away, the notes go with it. Export the CSV before you lose anything.
+- **A note only shows up when you refresh.** There's no live sync; Renée's note appears in Stacy's window the next time she reloads.
+- **Anyone with the link can delete anyone's notes.** There are no per-person permissions. If a note goes missing during the trial, that is where to look first.
+- **The notes are one file on one machine** (`data/notes.json`). If that machine is off, restarted, or the file is deleted, the notes are gone. Download the CSV before anything like that happens.
+- **There is no "delete all notes" button** — it belonged to the old offline version, and this is the shared one.
 - **The funder list is only William Penn Foundation and Lenfest Institute** until someone types a new one.
+- **School names are the rollup's, in capitals** (`LINCOLN HS`, `KIPP PHILADELPHIA CS`). That is the school's name in the data we were given, not a bug in the app.
 
 ---
 
